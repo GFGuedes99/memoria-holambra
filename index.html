@@ -32,7 +32,7 @@ footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.1
     <p>Digite a senha para entrar na nossa cápsula do tempo.</p>
     <input id="password" type="password" placeholder="Senha" autocomplete="current-password" required>
     <button type="submit">Entrar</button>
-    <div style="margin-top:14px"><a href="#" id="forgotLink" style="color:#172b4d;font-size:13px">Esqueci a senha</a></div>
+    <div style="margin-top:14px"><button type="button" id="forgotLink" onclick="document.getElementById('recoveryBox').style.display='block';document.getElementById('password').style.display='none';this.style.display='none';document.querySelector('#loginForm button[type=submit]').style.display='none';document.getElementById('recoveryEmail').focus();" style="background:transparent;color:#172b4d;border:0;text-decoration:underline;padding:4px;cursor:pointer;font-size:13px">Esqueci a senha</button></div>
     <div id="recoveryBox" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)">
       <p style="margin:0 0 12px">Digite o e-mail da conta para receber o link de recuperação.</p>
       <input id="recoveryEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
@@ -87,6 +87,19 @@ const AUTH_EMAIL = "COLOQUE_SEU_EMAIL_AQUI";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const bucket = "memorias";
+// Fallback direto para o botão de recuperação: funciona mesmo se o listener principal não for registrado.
+window.showRecovery = function(){
+  const box=document.getElementById("recoveryBox");
+  const pwd=document.getElementById("password");
+  const submit=document.querySelector("#loginForm button[type=submit]");
+  if(box) box.style.display="block";
+  if(pwd) pwd.style.display="none";
+  if(submit) submit.style.display="none";
+  const email=document.getElementById("recoveryEmail");
+  if(email && email.value==="" && AUTH_EMAIL!=="COLOQUE_SEU_EMAIL_AQUI") email.value=AUTH_EMAIL;
+  if(email) email.focus();
+};
+
 
 const loginOverlay = document.getElementById("loginOverlay");
 const loginForm = document.getElementById("loginForm");
