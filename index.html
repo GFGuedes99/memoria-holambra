@@ -16,7 +16,7 @@
 .letter{max-width:760px;margin:auto;background:var(--paper);border:1px solid var(--line);padding:42px 48px;box-shadow:0 14px 35px #172b4d0c}.letter p{font:24px/1.4 "Cormorant Garamond";margin:0 0 17px}.sign{font:42px Parisienne;color:var(--navy);margin-top:24px}
 .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.chapter{border-top:1px solid var(--navy);padding-top:12px}.chapter b{font-size:11px;letter-spacing:.15em;color:var(--navy)}.chapter h3{font:600 28px "Cormorant Garamond";margin:7px 0}.chapter p{font-size:13px;line-height:1.6;color:var(--muted)}
 footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.12em;color:var(--muted)}
-.edit{position:fixed;right:20px;bottom:20px;border:0;border-radius:999px;background:var(--navy);color:#fff;padding:13px 18px;font-weight:600;box-shadow:0 10px 25px #172b4d35;cursor:pointer}
+.edit{position:fixed;right:20px;bottom:20px;border:0;border-radius:999px;background:var(--navy);color:#fff;padding:15px 20px;font-weight:600;box-shadow:0 10px 25px #172b4d35;cursor:pointer;z-index:10;font-size:14px}.edit:hover{transform:translateY(-1px)}
 .overlay{position:fixed;inset:0;background:#172b4df2;z-index:20;display:grid;place-items:center;padding:20px}.login{width:min(420px,100%);background:var(--paper);padding:38px 30px;border:1px solid var(--line);box-shadow:0 25px 70px #0005;text-align:center}.login h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin:0 0 8px}.login p{font:14px/1.5;color:var(--muted);margin-bottom:25px}.login input{width:100%;padding:14px;border:1px solid var(--line);background:#fffdf8;border-radius:7px;font-size:16px;margin-bottom:10px}.login button,.upload label{display:inline-block;background:var(--navy);color:white;border:0;border-radius:7px;padding:13px 18px;font-weight:600;cursor:pointer}.error{color:var(--danger);font-size:13px;min-height:20px;margin:8px}
 .admin{display:none;position:fixed;inset:0;background:#172b4df2;z-index:15;padding:25px;overflow:auto}.panel{max-width:850px;margin:30px auto;background:var(--paper);padding:28px;border:1px solid var(--line)}.panel h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin-top:0}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.upload{margin:20px 0;padding:18px;border:1px dashed var(--line);background:#fffdf8}.upload input{display:none}.close{float:right;border:1px solid var(--line);background:transparent;padding:8px 12px;border-radius:7px;cursor:pointer}.status{font-size:13px;color:var(--muted);margin-top:10px}
 @media(max-width:700px){.hero{padding-top:55px}.flower{font-size:65px}.intro{font-size:23px}.letter{padding:30px 24px}.timeline{grid-template-columns:1fr}.video-inner{height:260px}}
@@ -35,25 +35,89 @@ footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.1
 <section class="section"><h2 class="title">Esse dia em pequenos capítulos</h2><div class="timeline"><div class="chapter"><b>09:00</b><h3>Chegada</h3><p>O começo de um dia que a gente ainda não sabia que ia guardar para sempre.</p></div><div class="chapter"><b>12:30</b><h3>Entre flores</h3><p>Um passeio, algumas fotos e um monte de motivos para sorrir.</p></div><div class="chapter"><b>∞</b><h3>Depois daqui</h3><p>O resto da história é nosso. Essa página só guarda um pedacinho dela.</p></div></div></section>
 </main>
 <footer>FEITO PARA SER ABERTO DE NOVO NO FUTURO · 🌻</footer>
-<button id="editBtn" class="edit" style="display:none">✏️ Editar memória</button>
+<button id="editBtn" class="edit">📸 Adicionar fotos e vídeos</button>
 
 <div id="admin" class="admin">
  <div class="panel">
   <button id="closeAdmin" class="close">Fechar</button>
   <h2>Editar memória</h2>
-  <p>Adicione fotos e vídeos diretamente no Supabase. A versão seguinte também vai trazer edição dos textos.</p>
+  <p>Escolha as fotos e vídeos do nosso dia. Eles serão salvos na nuvem e aparecerão automaticamente na galeria em formato Polaroid.</p>
   <div class="upload">
     <label for="mediaInput">📸 Escolher fotos / vídeos</label>
     <input id="mediaInput" type="file" accept="image/*,video/*" multiple>
     <div id="uploadStatus" class="status">Nenhum arquivo selecionado.</div>
   </div>
-  <button id="logoutBtn" class="close">Sair</button>
+  <p class="status">As mídias ficam salvas no Supabase. Por enquanto esta versão está sem senha para facilitar os testes.</p>
  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// V6 — modo público temporário: sem login/senha.
-// A autenticação e a edição pelo Supabase serão adicionadas depois que o site estiver aprovado visualmente.
+const SUPABASE_URL = "https://bijciqllpoxrntuvedfp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_1zKvtVVcOhDZtgkL4cXOXA_GxdWn3Lw";
+const BUCKET = "memorias";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const gallery = document.getElementById('gallery');
+const videoBox = document.getElementById('videoBox');
+const editBtn = document.getElementById('editBtn');
+const admin = document.getElementById('admin');
+const mediaInput = document.getElementById('mediaInput');
+const uploadStatus = document.getElementById('uploadStatus');
+
+function esc(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c]));}
+function publicUrl(path){return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;}
+
+async function loadMedia(){
+  gallery.innerHTML = '<div class="status">Carregando memórias...</div>' ;
+  const {data,error}=await db.from('midias').select('*').order('ordem',{ascending:true}).order('created_at',{ascending:true});
+  if(error){ gallery.innerHTML='<div class="status">Não foi possível carregar as fotos agora.</div>'; console.error(error); return; }
+  gallery.innerHTML='';
+  let firstVideo=null;
+  for(const item of (data||[])){
+    const url=publicUrl(item.arquivo_path);
+    const card=document.createElement('div'); card.className='polaroid';
+    const media=item.tipo && item.tipo.startsWith('video')
+      ? `<video src="${esc(url)}" controls playsinline preload="metadata"></video>`
+      : `<img src="${esc(url)}" alt="Memória" loading="lazy">`;
+    card.innerHTML=`<div class="photo">${media}</div>`;
+    gallery.appendChild(card);
+    if(!firstVideo && item.tipo && item.tipo.startsWith('video')) firstVideo=url;
+  }
+  if(!data || !data.length) gallery.innerHTML='<div class="status">As fotos do nosso dia vão aparecer aqui. 🌻</div>';
+  if(firstVideo){
+    videoBox.innerHTML=`<video src="${esc(firstVideo)}" controls playsinline preload="metadata"></video>`;
+  } else {
+    videoBox.innerHTML='<div class="play">▶</div>';
+  }
+}
+
+editBtn.style.display='block';
+editBtn.addEventListener('click',()=>{admin.style.display='block';});
+document.getElementById('closeAdmin').addEventListener('click',()=>{admin.style.display='none';});
+
+mediaInput.addEventListener('change',async()=>{
+  const files=[...mediaInput.files];
+  if(!files.length) return;
+  uploadStatus.textContent=`Enviando ${files.length} arquivo(s)...`;
+  let done=0;
+  for(const file of files){
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=`${Date.now()}_${Math.random().toString(36).slice(2,10)}_${safe}`;
+    const up=await db.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type});
+    if(up.error){console.error(up.error); uploadStatus.textContent=`Erro ao enviar ${file.name}: ${up.error.message}`; continue;}
+    const {data:ordRows}=await db.from('midias').select('ordem').order('ordem',{ascending:false}).limit(1);
+    const nextOrder=(ordRows && ordRows.length) ? (Number(ordRows[0].ordem)||0)+1 : 1;
+    const ins=await db.from('midias').insert({nome:file.name,tipo:file.type,arquivo_path:path,ordem:nextOrder});
+    if(ins.error){console.error(ins.error); await db.storage.from(BUCKET).remove([path]); uploadStatus.textContent=`Erro ao salvar ${file.name}: ${ins.error.message}`; continue;}
+    done++; uploadStatus.textContent=`${done}/${files.length} arquivo(s) enviado(s)...`;
+  }
+  mediaInput.value='';
+  await loadMedia();
+  uploadStatus.textContent=done===files.length ? 'Tudo salvo! 🌻' : `${done} arquivo(s) salvo(s).`;
+});
+
+loadMedia();
 </script>
 </body>
 </html>
