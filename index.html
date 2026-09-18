@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memória Holambra</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=Parisienne&display=swap');
+:root{--cream:#f5efe3;--paper:#fffaf1;--navy:#172b4d;--ink:#263247;--muted:#7d8491;--line:#d8cfbf;--danger:#9b3b3b}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,Arial,sans-serif}
+.top{position:sticky;top:0;z-index:5;padding:15px 24px;background:#f5efe3ee;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.brand{font:700 25px "Cormorant Garamond";color:var(--navy)}.private{font-size:11px;letter-spacing:.14em;color:var(--navy)}
+.hero,.section{max-width:1050px;margin:auto;padding-left:24px;padding-right:24px}.hero{padding-top:75px;padding-bottom:50px;position:relative}.kicker{font-size:11px;letter-spacing:.25em;color:var(--navy);font-weight:600}h1{font:400 clamp(70px,12vw,130px)/.85 Parisienne,cursive;color:var(--navy);margin:16px 0 25px}.intro{font:500 28px/1.2 "Cormorant Garamond";max-width:620px}.date{display:inline-block;margin-top:28px;padding:9px 0;border-top:1px solid var(--navy);border-bottom:1px solid var(--navy);font-size:12px;letter-spacing:.2em;color:var(--navy)}.flower{position:absolute;right:7%;top:55px;font-size:95px;color:var(--navy);opacity:.09}
+.section{padding-top:25px;padding-bottom:65px}.title{font:600 43px "Cormorant Garamond";color:var(--navy);margin:0 0 22px}.video{background:var(--paper);border:1px solid var(--line);padding:12px;box-shadow:0 16px 35px #172b4d10;transform:rotate(-.3deg)}.video-inner{height:390px;background:linear-gradient(135deg,#eee4d2,#faf6ec);display:grid;place-items:center;color:#958a77;overflow:hidden}.video-inner video{width:100%;height:100%;object-fit:cover}.play{width:72px;height:72px;border-radius:50%;background:var(--navy);color:white;display:grid;place-items:center;font-size:24px;padding-left:3px}.video-label{text-align:center;font:24px "Cormorant Garamond";padding:15px 5px 5px}
+.gallery{columns:3 230px;column-gap:25px}.polaroid{break-inside:avoid;margin:0 0 25px;padding:10px;background:#fffdf9;border:1px solid #e6dfd2;box-shadow:0 9px 20px #172b4d12;position:relative}.polaroid:nth-child(2){transform:rotate(1.3deg)}.polaroid:nth-child(3){transform:rotate(-1deg)}.polaroid:nth-child(4){transform:rotate(.8deg)}.polaroid:nth-child(5){transform:rotate(-1.4deg)}.polaroid:nth-child(6){transform:rotate(.6deg)}.photo{min-height:230px;display:grid;place-items:center;background:linear-gradient(145deg,#ddd2bf,#f4eddf);font-size:11px;letter-spacing:.1em;color:#948875;overflow:hidden}.photo img,.photo video{display:block;width:100%;max-height:420px;object-fit:cover}.remove{position:absolute;right:17px;top:17px;border:0;border-radius:50%;width:30px;height:30px;background:#fff;color:var(--danger);font-weight:700;box-shadow:0 2px 8px #0002;cursor:pointer}
+.letter{max-width:760px;margin:auto;background:var(--paper);border:1px solid var(--line);padding:42px 48px;box-shadow:0 14px 35px #172b4d0c}.letter p{font:24px/1.4 "Cormorant Garamond";margin:0 0 17px}.sign{font:42px Parisienne;color:var(--navy);margin-top:24px}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.chapter{border-top:1px solid var(--navy);padding-top:12px}.chapter b{font-size:11px;letter-spacing:.15em;color:var(--navy)}.chapter h3{font:600 28px "Cormorant Garamond";margin:7px 0}.chapter p{font-size:13px;line-height:1.6;color:var(--muted)}
+footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.edit{position:fixed;right:20px;bottom:20px;border:0;border-radius:999px;background:var(--navy);color:#fff;padding:13px 18px;font-weight:600;box-shadow:0 10px 25px #172b4d35;cursor:pointer}
+.overlay{position:fixed;inset:0;background:#172b4df2;z-index:20;display:grid;place-items:center;padding:20px}.login{width:min(420px,100%);background:var(--paper);padding:38px 30px;border:1px solid var(--line);box-shadow:0 25px 70px #0005;text-align:center}.login h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin:0 0 8px}.login p{font:14px/1.5;color:var(--muted);margin-bottom:25px}.login input{width:100%;padding:14px;border:1px solid var(--line);background:#fffdf8;border-radius:7px;font-size:16px;margin-bottom:10px}.login button,.upload label{display:inline-block;background:var(--navy);color:white;border:0;border-radius:7px;padding:13px 18px;font-weight:600;cursor:pointer}.error{color:var(--danger);font-size:13px;min-height:20px;margin:8px}
+.admin{display:none;position:fixed;inset:0;background:#172b4df2;z-index:15;padding:25px;overflow:auto}.panel{max-width:850px;margin:30px auto;background:var(--paper);padding:28px;border:1px solid var(--line)}.panel h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin-top:0}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.upload{margin:20px 0;padding:18px;border:1px dashed var(--line);background:#fffdf8}.upload input{display:none}.close{float:right;border:1px solid var(--line);background:transparent;padding:8px 12px;border-radius:7px;cursor:pointer}.status{font-size:13px;color:var(--muted);margin-top:10px}
+@media(max-width:700px){.hero{padding-top:55px}.flower{font-size:65px}.intro{font-size:23px}.letter{padding:30px 24px}.timeline{grid-template-columns:1fr}.video-inner{height:260px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">Memória Holambra</div><div class="private">🔒 PRIVADO</div></header>
+
+<div id="loginOverlay" class="overlay">
+  <form id="loginForm" class="login">
+    <div style="font-size:40px">🌻</div>
+    <h2>Algumas memórias não são para qualquer pessoa.</h2>
+    <p>Digite a senha para entrar na nossa cápsula do tempo.</p>
+    <input id="password" type="password" placeholder="Senha" autocomplete="current-password" required>
+    <button type="submit">Entrar</button>
+    <div style="margin-top:14px"><a href="#" id="forgotLink" style="color:#172b4d;font-size:13px">Esqueci a senha</a></div>
+    <div id="recoveryBox" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)">
+      <p style="margin:0 0 12px">Digite o e-mail da conta para receber o link de recuperação.</p>
+      <input id="recoveryEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
+      <button type="button" id="recoveryBtn">Enviar link</button>
+      <div style="margin-top:10px"><a href="#" id="backLogin" style="color:#172b4d;font-size:13px">Voltar para entrar</a></div>
+      <div id="recoveryMsg" class="error"></div>
+    </div>
+    <div id="newPasswordBox" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)">
+      <p style="margin:0 0 12px">Agora escolha sua nova senha.</p>
+      <input id="newPassword" type="password" placeholder="Nova senha" autocomplete="new-password">
+      <input id="newPassword2" type="password" placeholder="Repita a nova senha" autocomplete="new-password">
+      <button type="button" id="savePasswordBtn">Salvar nova senha</button>
+      <div id="newPasswordMsg" class="error"></div>
+    </div>
+    <div id="loginError" class="error"></div>
+  </form>
+</div>
+
+<main id="site">
+<section class="hero"><div class="flower">✿</div><div class="kicker">CÁPSULA DO TEMPO · 01</div><h1>O nosso dia.</h1><div class="intro">Um pedacinho de nós, guardado para voltar aqui quando o tempo já tiver passado.</div><div class="date">19 · 09 · 2026 &nbsp;•&nbsp; HOLAMBRA</div></section>
+<section class="section"><h2 class="title">Antes que a memória vire saudade</h2><div class="video"><div id="videoBox" class="video-inner"><div class="play">▶</div></div><div class="video-label">Nosso filme daquele dia</div></div></section>
+<section class="section"><h2 class="title">Alguns instantes</h2><div id="gallery" class="gallery"></div></section>
+<section class="section"><h2 class="title">O que eu queria te dizer</h2><div class="letter"><p>Se você está lendo isso anos depois, é porque a gente decidiu guardar esse dia. E eu espero que, ao olhar para essas fotos, você consiga sentir um pouquinho do que eu senti aqui.</p><p>Que a gente continue colecionando lugares, histórias, risadas e aqueles momentos pequenos que acabam sendo os mais importantes.</p><div class="sign">Nós dois.</div></div></section>
+<section class="section"><h2 class="title">Esse dia em pequenos capítulos</h2><div class="timeline"><div class="chapter"><b>09:00</b><h3>Chegada</h3><p>O começo de um dia que a gente ainda não sabia que ia guardar para sempre.</p></div><div class="chapter"><b>12:30</b><h3>Entre flores</h3><p>Um passeio, algumas fotos e um monte de motivos para sorrir.</p></div><div class="chapter"><b>∞</b><h3>Depois daqui</h3><p>O resto da história é nosso. Essa página só guarda um pedacinho dela.</p></div></div></section>
+</main>
+<footer>FEITO PARA SER ABERTO DE NOVO NO FUTURO · 🌻</footer>
+<button id="editBtn" class="edit" style="display:none">✏️ Editar memória</button>
+
+<div id="admin" class="admin">
+ <div class="panel">
+  <button id="closeAdmin" class="close">Fechar</button>
+  <h2>Editar memória</h2>
+  <p>Adicione fotos e vídeos diretamente no Supabase. A versão seguinte também vai trazer edição dos textos.</p>
+  <div class="upload">
+    <label for="mediaInput">📸 Escolher fotos / vídeos</label>
+    <input id="mediaInput" type="file" accept="image/*,video/*" multiple>
+    <div id="uploadStatus" class="status">Nenhum arquivo selecionado.</div>
+  </div>
+  <button id="logoutBtn" class="close">Sair</button>
+ </div>
+</div>
+
+<script>
+/* CONFIGURAÇÃO SUPABASE */
+const SUPABASE_URL = "https://bijciqllpoxrntuvedfp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_1zKvtVVcOhDZtgkL4cXOXA_GxdWn3Lw";
+
+/* O Supabase Auth usa e-mail + senha internamente.
+   Para manter a tela apenas com senha, coloque aqui o e-mail da conta
+   criada em Authentication > Users. */
+const AUTH_EMAIL = "COLOQUE_SEU_EMAIL_AQUI";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const bucket = "memorias";
+
+const loginOverlay = document.getElementById("loginOverlay");
+const loginForm = document.getElementById("loginForm");
+const loginError = document.getElementById("loginError");
+const editBtn = document.getElementById("editBtn");
+const admin = document.getElementById("admin");
+const forgotLink = document.getElementById("forgotLink");
+const recoveryBox = document.getElementById("recoveryBox");
+const recoveryEmail = document.getElementById("recoveryEmail");
+const recoveryBtn = document.getElementById("recoveryBtn");
+const recoveryMsg = document.getElementById("recoveryMsg");
+const backLogin = document.getElementById("backLogin");
+const newPasswordBox = document.getElementById("newPasswordBox");
+const newPassword = document.getElementById("newPassword");
+const newPassword2 = document.getElementById("newPassword2");
+const savePasswordBtn = document.getElementById("savePasswordBtn");
+const newPasswordMsg = document.getElementById("newPasswordMsg");
+
+async function loadMedia(){
+  const {data, error} = await supabase.from("midias").select("*").order("ordem",{ascending:true}).order("created_at",{ascending:true});
+  if(error){ console.error(error); return; }
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = "";
+  for(const item of (data || [])){
+    const {data:urlData,error:urlError} = await supabase.storage.from(bucket).createSignedUrl(item.arquivo_path, 3600);
+    if(urlError){console.error(urlError);continue;}
+    const card=document.createElement("div"); card.className="polaroid";
+    const box=document.createElement("div"); box.className="photo";
+    if(item.tipo==="video"){
+      const v=document.createElement("video"); v.src=urlData.signedUrl; v.controls=true; v.playsInline=true; box.appendChild(v);
+    }else{
+      const img=document.createElement("img"); img.src=urlData.signedUrl; img.alt=item.nome||"Memória"; box.appendChild(img);
+    }
+    if(editBtn.style.display!=="none"){
+      const del=document.createElement("button"); del.className="remove"; del.textContent="×"; del.title="Excluir";
+      del.onclick=()=>deleteMedia(item); card.appendChild(del);
+    }
+    card.appendChild(box); gallery.appendChild(card);
+  }
+  if(!data || data.length===0) gallery.innerHTML='<div class="polaroid"><div class="photo">SUAS FOTOS VÃO APARECER AQUI</div></div>';
+}
+
+async function deleteMedia(item){
+  if(!confirm("Excluir esta memória?")) return;
+  const {error:storageError}=await supabase.storage.from(bucket).remove([item.arquivo_path]);
+  if(storageError){alert(storageError.message);return;}
+  const {error:dbError}=await supabase.from("midias").delete().eq("id",item.id);
+  if(dbError){alert(dbError.message);return;}
+  loadMedia();
+}
+
+forgotLink.addEventListener("click",(e)=>{
+  e.preventDefault();
+  recoveryBox.style.display="block";
+  recoveryEmail.value=AUTH_EMAIL!=="COLOQUE_SEU_EMAIL_AQUI"?AUTH_EMAIL:"";
+  recoveryMsg.textContent="";
+  document.getElementById("password").style.display="none";
+  loginForm.querySelector('button[type="submit"]').style.display="none";
+});
+
+backLogin.addEventListener("click",(e)=>{
+  e.preventDefault();
+  recoveryBox.style.display="none";
+  newPasswordBox.style.display="none";
+  document.getElementById("password").style.display="block";
+  loginForm.querySelector('button[type="submit"]').style.display="inline-block";
+  recoveryMsg.textContent="";
+  newPasswordMsg.textContent="";
+});
+
+recoveryBtn.addEventListener("click",async()=>{
+  recoveryMsg.textContent="";
+  const email=recoveryEmail.value.trim();
+  if(!email){recoveryMsg.textContent="Digite o e-mail.";return;}
+  if(location.protocol==="file:"){
+    recoveryMsg.textContent="Primeiro precisamos publicar o site. O link de recuperação precisa voltar para uma URL web (não file://).";
+    return;
+  }
+  recoveryBtn.disabled=true;
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo});
+  recoveryBtn.disabled=false;
+  recoveryMsg.textContent=error?error.message:"Link enviado! Confira seu e-mail e abra o link.";
+});
+
+savePasswordBtn.addEventListener("click",async()=>{
+  newPasswordMsg.textContent="";
+  const p1=newPassword.value, p2=newPassword2.value;
+  if(p1.length<6){newPasswordMsg.textContent="Use pelo menos 6 caracteres.";return;}
+  if(p1!==p2){newPasswordMsg.textContent="As senhas não são iguais.";return;}
+  savePasswordBtn.disabled=true;
+  const {error}=await supabase.auth.updateUser({password:p1});
+  savePasswordBtn.disabled=false;
+  if(error){newPasswordMsg.textContent=error.message;return;}
+  newPasswordMsg.textContent="Senha alterada! Entrando...";
+  setTimeout(()=>{loginOverlay.style.display="none";editBtn.style.display="block";loadMedia();},700);
+});
+
+loginForm.addEventListener("submit",async(e)=>{
+  e.preventDefault(); loginError.textContent="";
+  if(AUTH_EMAIL==="COLOQUE_SEU_EMAIL_AQUI"){loginError.textContent="Ainda falta colocar o e-mail da conta no código.";return;}
+  const password=document.getElementById("password").value;
+  const {error}=await supabase.auth.signInWithPassword({email:AUTH_EMAIL,password});
+  if(error){loginError.textContent="Senha incorreta ou usuário não configurado.";return;}
+  loginOverlay.style.display="none"; editBtn.style.display="block"; loadMedia();
+});
+
+supabase.auth.onAuthStateChange((_event,session)=>{
+  if(_event==="PASSWORD_RECOVERY"){
+    loginOverlay.style.display="grid";
+    recoveryBox.style.display="none";
+    newPasswordBox.style.display="block";
+    document.getElementById("password").style.display="none";
+    loginForm.querySelector('button[type="submit"]').style.display="none";
+    forgotLink.style.display="none";
+    newPasswordMsg.textContent="";
+    return;
+  }
+  if(session && _event!=="SIGNED_OUT"){
+    loginOverlay.style.display="none";editBtn.style.display="block";loadMedia();
+  }
+});
+
+editBtn.onclick=()=>admin.style.display="block";
+document.getElementById("closeAdmin").onclick=()=>admin.style.display="none";
+document.getElementById("logoutBtn").onclick=async()=>{await supabase.auth.signOut();location.reload();};
+
+document.getElementById("mediaInput").addEventListener("change",async(e)=>{
+  const files=[...e.target.files]; if(!files.length)return;
+  const status=document.getElementById("uploadStatus");
+  status.textContent=`Enviando ${files.length} arquivo(s)...`;
+  for(const file of files){
+    const safeName=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9._-]/g,"-");
+    const path=`${crypto.randomUUID()}-${safeName}`;
+    const {error:upError}=await supabase.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type});
+    if(upError){status.textContent="Erro no upload: "+upError.message;return;}
+    const {count}=await supabase.from("midias").select("*",{count:"exact",head:true});
+    const {error:dbError}=await supabase.from("midias").insert({nome:file.name,tipo:file.type.startsWith("video/")?"video":"foto",arquivo_path:path,ordem:(count||0)+1});
+    if(dbError){await supabase.storage.from(bucket).remove([path]);status.textContent="Erro ao registrar arquivo: "+dbError.message;return;}
+  }
+  status.textContent="Upload concluído! 🌻";
+  e.target.value=""; loadMedia();
+});
+</script>
+</body>
+</html>
