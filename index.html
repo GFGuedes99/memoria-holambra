@@ -18,7 +18,7 @@
 footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.12em;color:var(--muted)}
 .edit{position:fixed;right:20px;bottom:20px;border:0;border-radius:999px;background:var(--navy);color:#fff;padding:15px 20px;font-weight:600;box-shadow:0 10px 25px #172b4d35;cursor:pointer;z-index:10;font-size:14px}.edit:hover{transform:translateY(-1px)}
 .overlay{position:fixed;inset:0;background:#172b4df2;z-index:20;display:grid;place-items:center;padding:20px}.login{width:min(420px,100%);background:var(--paper);padding:38px 30px;border:1px solid var(--line);box-shadow:0 25px 70px #0005;text-align:center}.login h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin:0 0 8px}.login p{font:14px/1.5;color:var(--muted);margin-bottom:25px}.login input{width:100%;padding:14px;border:1px solid var(--line);background:#fffdf8;border-radius:7px;font-size:16px;margin-bottom:10px}.login button,.upload label{display:inline-block;background:var(--navy);color:white;border:0;border-radius:7px;padding:13px 18px;font-weight:600;cursor:pointer}.error{color:var(--danger);font-size:13px;min-height:20px;margin:8px}
-.admin{display:none;position:fixed;inset:0;background:#172b4df2;z-index:15;padding:25px;overflow:auto}.panel{max-width:850px;margin:30px auto;background:var(--paper);padding:28px;border:1px solid var(--line)}.panel h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin-top:0}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.upload{margin:20px 0;padding:18px;border:1px dashed var(--line);background:#fffdf8}.upload input{display:none}.close{float:right;border:1px solid var(--line);background:transparent;padding:8px 12px;border-radius:7px;cursor:pointer}.status{font-size:13px;color:var(--muted);margin-top:10px}
+.admin{display:none;position:fixed;inset:0;background:#172b4df2;z-index:15;padding:25px;overflow:auto}.panel{max-width:850px;margin:30px auto;background:var(--paper);padding:28px;border:1px solid var(--line)}.panel h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin-top:0}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.upload{margin:20px 0;padding:18px;border:1px dashed var(--line);background:#fffdf8}.upload input{display:none}.close{float:right;border:1px solid var(--line);background:transparent;padding:8px 12px;border-radius:7px;cursor:pointer}.status{font-size:13px;color:var(--muted);margin-top:10px}.manage{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}.manage h3{font:600 28px "Cormorant Garamond";color:var(--navy);margin:0 0 12px}.media-list{display:grid;gap:10px}.media-item{display:flex;align-items:center;gap:12px;padding:10px;background:#fffdf8;border:1px solid var(--line);border-radius:8px}.media-thumb{width:62px;height:62px;object-fit:cover;background:#eee4d2;border-radius:5px;flex:none}.media-name{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.delete-btn{border:1px solid #d8b9b9;background:#fff7f7;color:var(--danger);padding:8px 11px;border-radius:7px;font-weight:600;cursor:pointer}.delete-btn:hover{background:#fceaea}.empty-list{padding:14px;border:1px dashed var(--line);color:var(--muted);font-size:13px;text-align:center}
 @media(max-width:700px){.hero{padding-top:55px}.flower{font-size:65px}.intro{font-size:23px}.letter{padding:30px 24px}.timeline{grid-template-columns:1fr}.video-inner{height:260px}}
 </style>
 </head>
@@ -47,6 +47,10 @@ footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.1
     <input id="mediaInput" type="file" accept="image/*,video/*" multiple>
     <div id="uploadStatus" class="status">Nenhum arquivo selecionado.</div>
   </div>
+  <div class="manage">
+    <h3>Gerenciar mídias</h3>
+    <div id="mediaList" class="media-list"><div class="status">Carregando...</div></div>
+  </div>
   <p class="status">As mídias ficam salvas no Supabase. Por enquanto esta versão está sem senha para facilitar os testes.</p>
  </div>
 </div>
@@ -64,6 +68,7 @@ const editBtn = document.getElementById('editBtn');
 const admin = document.getElementById('admin');
 const mediaInput = document.getElementById('mediaInput');
 const uploadStatus = document.getElementById('uploadStatus');
+const mediaList = document.getElementById('mediaList');
 
 function esc(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c]));}
 function publicUrl(path){return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;}
@@ -85,10 +90,50 @@ async function loadMedia(){
     if(!firstVideo && item.tipo && item.tipo.startsWith('video')) firstVideo=url;
   }
   if(!data || !data.length) gallery.innerHTML='<div class="status">As fotos do nosso dia vão aparecer aqui. 🌻</div>';
+  renderMediaManager(data || []);
   if(firstVideo){
     videoBox.innerHTML=`<video src="${esc(firstVideo)}" controls playsinline preload="metadata"></video>`;
   } else {
     videoBox.innerHTML='<div class="play">▶</div>';
+  }
+}
+
+async function renderMediaManager(items){
+  if(!items.length){
+    mediaList.innerHTML='<div class="empty-list">Nenhuma foto ou vídeo salvo ainda. 🌻</div>';
+    return;
+  }
+  mediaList.innerHTML='';
+  for(const item of items){
+    const row=document.createElement('div'); row.className='media-item';
+    const url=publicUrl(item.arquivo_path);
+    const thumb=item.tipo && item.tipo.startsWith('video')
+      ? `<video class="media-thumb" src="${esc(url)}" muted playsinline preload="metadata"></video>`
+      : `<img class="media-thumb" src="${esc(url)}" alt="">`;
+    row.innerHTML=`${thumb}<div class="media-name" title="${esc(item.nome || '')}">${esc(item.nome || 'Memória')}</div><button class="delete-btn" type="button">🗑️ Excluir</button>`;
+    row.querySelector('.delete-btn').addEventListener('click', async ()=>{
+      const ok=confirm(`Excluir "${item.nome || 'esta memória'}"?\n\nEssa ação não pode ser desfeita.`);
+      if(!ok) return;
+      const btn=row.querySelector('.delete-btn');
+      btn.disabled=true; btn.textContent='Excluindo...';
+      const storageDel=await db.storage.from(BUCKET).remove([item.arquivo_path]);
+      if(storageDel.error){
+        console.error(storageDel.error);
+        btn.disabled=false; btn.textContent='🗑️ Excluir';
+        alert('Não foi possível apagar o arquivo: '+storageDel.error.message);
+        return;
+      }
+      const dbDel=await db.from('midias').delete().eq('id',item.id);
+      if(dbDel.error){
+        console.error(dbDel.error);
+        alert('O arquivo foi apagado, mas o registro não. Atualize a página e me avise se ele continuar aparecendo.');
+        await loadMedia();
+        return;
+      }
+      await loadMedia();
+      uploadStatus.textContent='Mídia excluída. 🗑️';
+    });
+    mediaList.appendChild(row);
   }
 }
 
