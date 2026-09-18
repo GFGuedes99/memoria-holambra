@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memória Holambra</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=Parisienne&display=swap');
+:root{--cream:#f5efe3;--paper:#fffaf1;--navy:#172b4d;--ink:#263247;--muted:#7d8491;--line:#d8cfbf;--danger:#9b3b3b}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,Arial,sans-serif}
+.top{position:sticky;top:0;z-index:5;padding:15px 24px;background:#f5efe3ee;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.brand{font:700 25px "Cormorant Garamond";color:var(--navy)}.private{font-size:11px;letter-spacing:.14em;color:var(--navy)}
+.hero,.section{max-width:1050px;margin:auto;padding-left:24px;padding-right:24px}.hero{padding-top:75px;padding-bottom:50px;position:relative}.kicker{font-size:11px;letter-spacing:.25em;color:var(--navy);font-weight:600}h1{font:400 clamp(70px,12vw,130px)/.85 Parisienne,cursive;color:var(--navy);margin:16px 0 25px}.intro{font:500 28px/1.2 "Cormorant Garamond";max-width:620px}.date{display:inline-block;margin-top:28px;padding:9px 0;border-top:1px solid var(--navy);border-bottom:1px solid var(--navy);font-size:12px;letter-spacing:.2em;color:var(--navy)}.flower{position:absolute;right:7%;top:55px;font-size:95px;color:var(--navy);opacity:.09}
+.section{padding-top:25px;padding-bottom:65px}.title{font:600 43px "Cormorant Garamond";color:var(--navy);margin:0 0 22px}.video{background:var(--paper);border:1px solid var(--line);padding:12px;box-shadow:0 16px 35px #172b4d10;transform:rotate(-.3deg)}.video-inner{height:390px;background:linear-gradient(135deg,#eee4d2,#faf6ec);display:grid;place-items:center;color:#958a77;overflow:hidden}.video-inner video{width:100%;height:100%;object-fit:cover}.play{width:72px;height:72px;border-radius:50%;background:var(--navy);color:white;display:grid;place-items:center;font-size:24px;padding-left:3px}.video-label{text-align:center;font:24px "Cormorant Garamond";padding:15px 5px 5px}
+.gallery{columns:3 230px;column-gap:25px}.polaroid{break-inside:avoid;margin:0 0 25px;padding:10px;background:#fffdf9;border:1px solid #e6dfd2;box-shadow:0 9px 20px #172b4d12;position:relative}.polaroid:nth-child(2){transform:rotate(1.3deg)}.polaroid:nth-child(3){transform:rotate(-1deg)}.polaroid:nth-child(4){transform:rotate(.8deg)}.polaroid:nth-child(5){transform:rotate(-1.4deg)}.polaroid:nth-child(6){transform:rotate(.6deg)}.photo{min-height:230px;display:grid;place-items:center;background:linear-gradient(145deg,#ddd2bf,#f4eddf);font-size:11px;letter-spacing:.1em;color:#948875;overflow:hidden}.photo img,.photo video{display:block;width:100%;max-height:420px;object-fit:cover}.remove{position:absolute;right:17px;top:17px;border:0;border-radius:50%;width:30px;height:30px;background:#fff;color:var(--danger);font-weight:700;box-shadow:0 2px 8px #0002;cursor:pointer}
+.letter{max-width:760px;margin:auto;background:var(--paper);border:1px solid var(--line);padding:42px 48px;box-shadow:0 14px 35px #172b4d0c}.letter p{font:24px/1.4 "Cormorant Garamond";margin:0 0 17px}.sign{font:42px Parisienne;color:var(--navy);margin-top:24px}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.chapter{border-top:1px solid var(--navy);padding-top:12px}.chapter b{font-size:11px;letter-spacing:.15em;color:var(--navy)}.chapter h3{font:600 28px "Cormorant Garamond";margin:7px 0}.chapter p{font-size:13px;line-height:1.6;color:var(--muted)}
+footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.edit{position:fixed;right:20px;bottom:20px;border:0;border-radius:999px;background:var(--navy);color:#fff;padding:15px 20px;font-weight:600;box-shadow:0 10px 25px #172b4d35;cursor:pointer;z-index:10;font-size:14px}.edit:hover{transform:translateY(-1px)}
+.overlay{position:fixed;inset:0;background:#172b4df2;z-index:20;display:grid;place-items:center;padding:20px}.login{width:min(420px,100%);background:var(--paper);padding:38px 30px;border:1px solid var(--line);box-shadow:0 25px 70px #0005;text-align:center}.login h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin:0 0 8px}.login p{font:14px/1.5;color:var(--muted);margin-bottom:25px}.login input{width:100%;padding:14px;border:1px solid var(--line);background:#fffdf8;border-radius:7px;font-size:16px;margin-bottom:10px}.login button,.upload label{display:inline-block;background:var(--navy);color:white;border:0;border-radius:7px;padding:13px 18px;font-weight:600;cursor:pointer}.error{color:var(--danger);font-size:13px;min-height:20px;margin:8px}
+.admin{display:none;position:fixed;inset:0;background:#172b4df2;z-index:15;padding:25px;overflow:auto}.panel{max-width:850px;margin:30px auto;background:var(--paper);padding:28px;border:1px solid var(--line)}.panel h2{font:600 38px "Cormorant Garamond";color:var(--navy);margin-top:0}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.upload{margin:20px 0;padding:18px;border:1px dashed var(--line);background:#fffdf8}.upload input{display:none}.close{float:right;border:1px solid var(--line);background:transparent;padding:8px 12px;border-radius:7px;cursor:pointer}.status{font-size:13px;color:var(--muted);margin-top:10px}.manage{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}.manage h3{font:600 28px "Cormorant Garamond";color:var(--navy);margin:0 0 12px}.media-list{display:grid;gap:10px}.media-item{display:flex;align-items:center;gap:12px;padding:10px;background:#fffdf8;border:1px solid var(--line);border-radius:8px}.media-thumb{width:62px;height:62px;object-fit:cover;background:#eee4d2;border-radius:5px;flex:none}.media-name{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.delete-btn{border:1px solid #d8b9b9;background:#fff7f7;color:var(--danger);padding:8px 11px;border-radius:7px;font-weight:600;cursor:pointer}.delete-btn:hover{background:#fceaea}.empty-list{padding:14px;border:1px dashed var(--line);color:var(--muted);font-size:13px;text-align:center}
+@media(max-width:700px){.hero{padding-top:55px}.flower{font-size:65px}.intro{font-size:23px}.letter{padding:30px 24px}.timeline{grid-template-columns:1fr}.video-inner{height:260px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">Memória Holambra</div><div class="private">🌻 CÁPSULA DO TEMPO</div></header>
+
+
+
+<main id="site">
+<section class="hero"><div class="flower">✿</div><div class="kicker">CÁPSULA DO TEMPO · 01</div><h1>O nosso dia.</h1><div class="intro">Um pedacinho de nós, guardado para voltar aqui quando o tempo já tiver passado.</div><div class="date">19 · 09 · 2026 &nbsp;•&nbsp; HOLAMBRA</div></section>
+<section class="section"><h2 class="title">Antes que a memória vire saudade</h2><div class="video"><div id="videoBox" class="video-inner"><div class="play">▶</div></div><div class="video-label">Nosso filme daquele dia</div></div></section>
+<section class="section"><h2 class="title">Alguns instantes</h2><div id="gallery" class="gallery"></div></section>
+<section class="section"><h2 class="title">O que eu queria te dizer</h2><div class="letter"><p>Se você está lendo isso anos depois, é porque a gente decidiu guardar esse dia. E eu espero que, ao olhar para essas fotos, você consiga sentir um pouquinho do que eu senti aqui.</p><p>Que a gente continue colecionando lugares, histórias, risadas e aqueles momentos pequenos que acabam sendo os mais importantes.</p><div class="sign">Nós dois.</div></div></section>
+<section class="section"><h2 class="title">Esse dia em pequenos capítulos</h2><div class="timeline"><div class="chapter"><b>09:00</b><h3>Chegada</h3><p>O começo de um dia que a gente ainda não sabia que ia guardar para sempre.</p></div><div class="chapter"><b>12:30</b><h3>Entre flores</h3><p>Um passeio, algumas fotos e um monte de motivos para sorrir.</p></div><div class="chapter"><b>∞</b><h3>Depois daqui</h3><p>O resto da história é nosso. Essa página só guarda um pedacinho dela.</p></div></div></section>
+</main>
+<footer>FEITO PARA SER ABERTO DE NOVO NO FUTURO · 🌻</footer>
+<button id="editBtn" class="edit">📸 Adicionar fotos e vídeos</button>
+
+<div id="admin" class="admin">
+ <div class="panel">
+  <button id="closeAdmin" class="close">Fechar</button>
+  <h2>Editar memória</h2>
+  <p>Escolha as fotos e vídeos do nosso dia. Eles serão salvos na nuvem e aparecerão automaticamente na galeria em formato Polaroid.</p>
+  <div class="upload">
+    <label for="mediaInput">📸 Escolher fotos / vídeos</label>
+    <input id="mediaInput" type="file" accept="image/*,video/*" multiple>
+    <div id="uploadStatus" class="status">Nenhum arquivo selecionado.</div>
+  </div>
+  <div class="manage">
+    <h3>Gerenciar mídias</h3>
+    <div id="mediaList" class="media-list"><div class="status">Carregando...</div></div>
+  </div>
+  <p class="status">As mídias ficam salvas no Supabase. Por enquanto esta versão está sem senha para facilitar os testes.</p>
+ </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://bijciqllpoxrntuvedfp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_1zKvtVVcOhDZtgkL4cXOXA_GxdWn3Lw";
+const BUCKET = "memorias";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const gallery = document.getElementById('gallery');
+const videoBox = document.getElementById('videoBox');
+const editBtn = document.getElementById('editBtn');
+const admin = document.getElementById('admin');
+const mediaInput = document.getElementById('mediaInput');
+const uploadStatus = document.getElementById('uploadStatus');
+const mediaList = document.getElementById('mediaList');
+
+function esc(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c]));}
+function publicUrl(path){return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;}
+
+async function loadMedia(){
+  gallery.innerHTML = '<div class="status">Carregando memórias...</div>' ;
+  const {data,error}=await db.from('midias').select('*').order('ordem',{ascending:true}).order('created_at',{ascending:true});
+  if(error){ gallery.innerHTML='<div class="status">Não foi possível carregar as fotos agora.</div>'; console.error(error); return; }
+  gallery.innerHTML='';
+  let firstVideo=null;
+  for(const item of (data||[])){
+    const url=publicUrl(item.arquivo_path);
+    const card=document.createElement('div'); card.className='polaroid';
+    const media=item.tipo && item.tipo.startsWith('video')
+      ? `<video src="${esc(url)}" controls playsinline preload="metadata"></video>`
+      : `<img src="${esc(url)}" alt="Memória" loading="lazy">`;
+    card.innerHTML=`<div class="photo">${media}</div>`;
+    gallery.appendChild(card);
+    if(!firstVideo && item.tipo && item.tipo.startsWith('video')) firstVideo=url;
+  }
+  if(!data || !data.length) gallery.innerHTML='<div class="status">As fotos do nosso dia vão aparecer aqui. 🌻</div>';
+  renderMediaManager(data || []);
+  if(firstVideo){
+    videoBox.innerHTML=`<video src="${esc(firstVideo)}" controls playsinline preload="metadata"></video>`;
+  } else {
+    videoBox.innerHTML='<div class="play">▶</div>';
+  }
+}
+
+async function renderMediaManager(items){
+  if(!items.length){
+    mediaList.innerHTML='<div class="empty-list">Nenhuma foto ou vídeo salvo ainda. 🌻</div>';
+    return;
+  }
+  mediaList.innerHTML='';
+  for(const item of items){
+    const row=document.createElement('div'); row.className='media-item';
+    const url=publicUrl(item.arquivo_path);
+    const thumb=item.tipo && item.tipo.startsWith('video')
+      ? `<video class="media-thumb" src="${esc(url)}" muted playsinline preload="metadata"></video>`
+      : `<img class="media-thumb" src="${esc(url)}" alt="">`;
+    row.innerHTML=`${thumb}<div class="media-name" title="${esc(item.nome || '')}">${esc(item.nome || 'Memória')}</div><button class="delete-btn" type="button">🗑️ Excluir</button>`;
+    row.querySelector('.delete-btn').addEventListener('click', async ()=>{
+      const ok=confirm(`Excluir "${item.nome || 'esta memória'}"?\n\nEssa ação não pode ser desfeita.`);
+      if(!ok) return;
+      const btn=row.querySelector('.delete-btn');
+      btn.disabled=true; btn.textContent='Excluindo...';
+      const storageDel=await db.storage.from(BUCKET).remove([item.arquivo_path]);
+      if(storageDel.error){
+        console.error(storageDel.error);
+        btn.disabled=false; btn.textContent='🗑️ Excluir';
+        alert('Não foi possível apagar o arquivo: '+storageDel.error.message);
+        return;
+      }
+      const dbDel=await db.from('midias').delete().eq('id',item.id);
+      if(dbDel.error){
+        console.error(dbDel.error);
+        alert('O arquivo foi apagado, mas o registro não. Atualize a página e me avise se ele continuar aparecendo.');
+        await loadMedia();
+        return;
+      }
+      await loadMedia();
+      uploadStatus.textContent='Mídia excluída. 🗑️';
+    });
+    mediaList.appendChild(row);
+  }
+}
+
+editBtn.style.display='block';
+editBtn.addEventListener('click',()=>{admin.style.display='block';});
+document.getElementById('closeAdmin').addEventListener('click',()=>{admin.style.display='none';});
+
+mediaInput.addEventListener('change',async()=>{
+  const files=[...mediaInput.files];
+  if(!files.length) return;
+  uploadStatus.textContent=`Enviando ${files.length} arquivo(s)...`;
+  let done=0;
+  for(const file of files){
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=`${Date.now()}_${Math.random().toString(36).slice(2,10)}_${safe}`;
+    const up=await db.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type});
+    if(up.error){console.error(up.error); uploadStatus.textContent=`Erro ao enviar ${file.name}: ${up.error.message}`; continue;}
+    const {data:ordRows}=await db.from('midias').select('ordem').order('ordem',{ascending:false}).limit(1);
+    const nextOrder=(ordRows && ordRows.length) ? (Number(ordRows[0].ordem)||0)+1 : 1;
+    const ins=await db.from('midias').insert({nome:file.name,tipo:file.type,arquivo_path:path,ordem:nextOrder});
+    if(ins.error){console.error(ins.error); await db.storage.from(BUCKET).remove([path]); uploadStatus.textContent=`Erro ao salvar ${file.name}: ${ins.error.message}`; continue;}
+    done++; uploadStatus.textContent=`${done}/${files.length} arquivo(s) enviado(s)...`;
+  }
+  mediaInput.value='';
+  await loadMedia();
+  uploadStatus.textContent=done===files.length ? 'Tudo salvo! 🌻' : `${done} arquivo(s) salvo(s).`;
+});
+
+loadMedia();
+</script>
+</body>
+</html>
