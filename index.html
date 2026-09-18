@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Memória Holambra</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=Parisienne&display=swap');
 :root{--cream:#f5efe3;--paper:#fffaf1;--navy:#172b4d;--ink:#263247;--muted:#7d8491;--line:#d8cfbf;--danger:#9b3b3b}
@@ -23,33 +23,9 @@ footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.1
 </style>
 </head>
 <body>
-<header class="top"><div class="brand">Memória Holambra</div><div class="private">🔒 PRIVADO</div></header>
+<header class="top"><div class="brand">Memória Holambra</div><div class="private">🌻 CÁPSULA DO TEMPO</div></header>
 
-<div id="loginOverlay" class="overlay">
-  <form id="loginForm" class="login">
-    <div style="font-size:40px">🌻</div>
-    <h2>Algumas memórias não são para qualquer pessoa.</h2>
-    <p>Digite a senha para entrar na nossa cápsula do tempo.</p>
-    <input id="password" type="password" placeholder="Senha" autocomplete="current-password" required>
-    <button type="submit">Entrar</button>
-    <div style="margin-top:14px"><button type="button" id="forgotLink" onclick="document.getElementById('recoveryBox').style.display='block';document.getElementById('password').style.display='none';this.style.display='none';document.querySelector('#loginForm button[type=submit]').style.display='none';document.getElementById('recoveryEmail').focus();" style="background:transparent;color:#172b4d;border:0;text-decoration:underline;padding:4px;cursor:pointer;font-size:13px">Esqueci a senha</button></div>
-    <div id="recoveryBox" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)">
-      <p style="margin:0 0 12px">Digite o e-mail da conta para receber o link de recuperação.</p>
-      <input id="recoveryEmail" type="email" placeholder="Seu e-mail" autocomplete="email">
-      <button type="button" id="recoveryBtn">Enviar link</button>
-      <div style="margin-top:10px"><a href="#" id="backLogin" style="color:#172b4d;font-size:13px">Voltar para entrar</a></div>
-      <div id="recoveryMsg" class="error"></div>
-    </div>
-    <div id="newPasswordBox" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)">
-      <p style="margin:0 0 12px">Agora escolha sua nova senha.</p>
-      <input id="newPassword" type="password" placeholder="Nova senha" autocomplete="new-password">
-      <input id="newPassword2" type="password" placeholder="Repita a nova senha" autocomplete="new-password">
-      <button type="button" id="savePasswordBtn">Salvar nova senha</button>
-      <div id="newPasswordMsg" class="error"></div>
-    </div>
-    <div id="loginError" class="error"></div>
-  </form>
-</div>
+
 
 <main id="site">
 <section class="hero"><div class="flower">✿</div><div class="kicker">CÁPSULA DO TEMPO · 01</div><h1>O nosso dia.</h1><div class="intro">Um pedacinho de nós, guardado para voltar aqui quando o tempo já tiver passado.</div><div class="date">19 · 09 · 2026 &nbsp;•&nbsp; HOLAMBRA</div></section>
@@ -76,173 +52,8 @@ footer{text-align:center;padding:25px 20px 65px;font-size:10px;letter-spacing:.1
 </div>
 
 <script>
-/* CONFIGURAÇÃO SUPABASE */
-const SUPABASE_URL = "https://bijciqllpoxrntuvedfp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_1zKvtVVcOhDZtgkL4cXOXA_GxdWn3Lw";
-
-/* O Supabase Auth usa e-mail + senha internamente.
-   Para manter a tela apenas com senha, coloque aqui o e-mail da conta
-   criada em Authentication > Users. */
-const AUTH_EMAIL = "COLOQUE_SEU_EMAIL_AQUI";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-const bucket = "memorias";
-// Fallback direto para o botão de recuperação: funciona mesmo se o listener principal não for registrado.
-window.showRecovery = function(){
-  const box=document.getElementById("recoveryBox");
-  const pwd=document.getElementById("password");
-  const submit=document.querySelector("#loginForm button[type=submit]");
-  if(box) box.style.display="block";
-  if(pwd) pwd.style.display="none";
-  if(submit) submit.style.display="none";
-  const email=document.getElementById("recoveryEmail");
-  if(email && email.value==="" && AUTH_EMAIL!=="COLOQUE_SEU_EMAIL_AQUI") email.value=AUTH_EMAIL;
-  if(email) email.focus();
-};
-
-
-const loginOverlay = document.getElementById("loginOverlay");
-const loginForm = document.getElementById("loginForm");
-const loginError = document.getElementById("loginError");
-const editBtn = document.getElementById("editBtn");
-const admin = document.getElementById("admin");
-const forgotLink = document.getElementById("forgotLink");
-const recoveryBox = document.getElementById("recoveryBox");
-const recoveryEmail = document.getElementById("recoveryEmail");
-const recoveryBtn = document.getElementById("recoveryBtn");
-const recoveryMsg = document.getElementById("recoveryMsg");
-const backLogin = document.getElementById("backLogin");
-const newPasswordBox = document.getElementById("newPasswordBox");
-const newPassword = document.getElementById("newPassword");
-const newPassword2 = document.getElementById("newPassword2");
-const savePasswordBtn = document.getElementById("savePasswordBtn");
-const newPasswordMsg = document.getElementById("newPasswordMsg");
-
-async function loadMedia(){
-  const {data, error} = await supabase.from("midias").select("*").order("ordem",{ascending:true}).order("created_at",{ascending:true});
-  if(error){ console.error(error); return; }
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
-  for(const item of (data || [])){
-    const {data:urlData,error:urlError} = await supabase.storage.from(bucket).createSignedUrl(item.arquivo_path, 3600);
-    if(urlError){console.error(urlError);continue;}
-    const card=document.createElement("div"); card.className="polaroid";
-    const box=document.createElement("div"); box.className="photo";
-    if(item.tipo==="video"){
-      const v=document.createElement("video"); v.src=urlData.signedUrl; v.controls=true; v.playsInline=true; box.appendChild(v);
-    }else{
-      const img=document.createElement("img"); img.src=urlData.signedUrl; img.alt=item.nome||"Memória"; box.appendChild(img);
-    }
-    if(editBtn.style.display!=="none"){
-      const del=document.createElement("button"); del.className="remove"; del.textContent="×"; del.title="Excluir";
-      del.onclick=()=>deleteMedia(item); card.appendChild(del);
-    }
-    card.appendChild(box); gallery.appendChild(card);
-  }
-  if(!data || data.length===0) gallery.innerHTML='<div class="polaroid"><div class="photo">SUAS FOTOS VÃO APARECER AQUI</div></div>';
-}
-
-async function deleteMedia(item){
-  if(!confirm("Excluir esta memória?")) return;
-  const {error:storageError}=await supabase.storage.from(bucket).remove([item.arquivo_path]);
-  if(storageError){alert(storageError.message);return;}
-  const {error:dbError}=await supabase.from("midias").delete().eq("id",item.id);
-  if(dbError){alert(dbError.message);return;}
-  loadMedia();
-}
-
-forgotLink.addEventListener("click",(e)=>{
-  e.preventDefault();
-  recoveryBox.style.display="block";
-  recoveryEmail.value=AUTH_EMAIL!=="COLOQUE_SEU_EMAIL_AQUI"?AUTH_EMAIL:"";
-  recoveryMsg.textContent="";
-  document.getElementById("password").style.display="none";
-  loginForm.querySelector('button[type="submit"]').style.display="none";
-});
-
-backLogin.addEventListener("click",(e)=>{
-  e.preventDefault();
-  recoveryBox.style.display="none";
-  newPasswordBox.style.display="none";
-  document.getElementById("password").style.display="block";
-  loginForm.querySelector('button[type="submit"]').style.display="inline-block";
-  recoveryMsg.textContent="";
-  newPasswordMsg.textContent="";
-});
-
-recoveryBtn.addEventListener("click",async()=>{
-  recoveryMsg.textContent="";
-  const email=recoveryEmail.value.trim();
-  if(!email){recoveryMsg.textContent="Digite o e-mail.";return;}
-  if(location.protocol==="file:"){
-    recoveryMsg.textContent="Primeiro precisamos publicar o site. O link de recuperação precisa voltar para uma URL web (não file://).";
-    return;
-  }
-  recoveryBtn.disabled=true;
-  const redirectTo=window.location.origin+window.location.pathname;
-  const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo});
-  recoveryBtn.disabled=false;
-  recoveryMsg.textContent=error?error.message:"Link enviado! Confira seu e-mail e abra o link.";
-});
-
-savePasswordBtn.addEventListener("click",async()=>{
-  newPasswordMsg.textContent="";
-  const p1=newPassword.value, p2=newPassword2.value;
-  if(p1.length<6){newPasswordMsg.textContent="Use pelo menos 6 caracteres.";return;}
-  if(p1!==p2){newPasswordMsg.textContent="As senhas não são iguais.";return;}
-  savePasswordBtn.disabled=true;
-  const {error}=await supabase.auth.updateUser({password:p1});
-  savePasswordBtn.disabled=false;
-  if(error){newPasswordMsg.textContent=error.message;return;}
-  newPasswordMsg.textContent="Senha alterada! Entrando...";
-  setTimeout(()=>{loginOverlay.style.display="none";editBtn.style.display="block";loadMedia();},700);
-});
-
-loginForm.addEventListener("submit",async(e)=>{
-  e.preventDefault(); loginError.textContent="";
-  if(AUTH_EMAIL==="COLOQUE_SEU_EMAIL_AQUI"){loginError.textContent="Ainda falta colocar o e-mail da conta no código.";return;}
-  const password=document.getElementById("password").value;
-  const {error}=await supabase.auth.signInWithPassword({email:AUTH_EMAIL,password});
-  if(error){loginError.textContent="Senha incorreta ou usuário não configurado.";return;}
-  loginOverlay.style.display="none"; editBtn.style.display="block"; loadMedia();
-});
-
-supabase.auth.onAuthStateChange((_event,session)=>{
-  if(_event==="PASSWORD_RECOVERY"){
-    loginOverlay.style.display="grid";
-    recoveryBox.style.display="none";
-    newPasswordBox.style.display="block";
-    document.getElementById("password").style.display="none";
-    loginForm.querySelector('button[type="submit"]').style.display="none";
-    forgotLink.style.display="none";
-    newPasswordMsg.textContent="";
-    return;
-  }
-  if(session && _event!=="SIGNED_OUT"){
-    loginOverlay.style.display="none";editBtn.style.display="block";loadMedia();
-  }
-});
-
-editBtn.onclick=()=>admin.style.display="block";
-document.getElementById("closeAdmin").onclick=()=>admin.style.display="none";
-document.getElementById("logoutBtn").onclick=async()=>{await supabase.auth.signOut();location.reload();};
-
-document.getElementById("mediaInput").addEventListener("change",async(e)=>{
-  const files=[...e.target.files]; if(!files.length)return;
-  const status=document.getElementById("uploadStatus");
-  status.textContent=`Enviando ${files.length} arquivo(s)...`;
-  for(const file of files){
-    const safeName=file.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9._-]/g,"-");
-    const path=`${crypto.randomUUID()}-${safeName}`;
-    const {error:upError}=await supabase.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type});
-    if(upError){status.textContent="Erro no upload: "+upError.message;return;}
-    const {count}=await supabase.from("midias").select("*",{count:"exact",head:true});
-    const {error:dbError}=await supabase.from("midias").insert({nome:file.name,tipo:file.type.startsWith("video/")?"video":"foto",arquivo_path:path,ordem:(count||0)+1});
-    if(dbError){await supabase.storage.from(bucket).remove([path]);status.textContent="Erro ao registrar arquivo: "+dbError.message;return;}
-  }
-  status.textContent="Upload concluído! 🌻";
-  e.target.value=""; loadMedia();
-});
+// V6 — modo público temporário: sem login/senha.
+// A autenticação e a edição pelo Supabase serão adicionadas depois que o site estiver aprovado visualmente.
 </script>
 </body>
 </html>
